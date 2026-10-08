@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Matrix Studio — 20 styles × 20 personnages</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0a12;--panel:#16161f;--panel2:#1e1e2b;--border:#2a2a3a;--ink:#e8e6e0;--dim:#8a8896;--faint:#4a4858;--y:#e5c15a;--o:#e87b35;--b:#4a7bc8;--p:#8b5fc4;--mint:#a8d8c8;--ok:#4a9d6a;--err:#c85a4a;--warn:#d4a017;--r:6px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:1rem 0.8rem 8rem;font-size:14px;line-height:1.5;max-width:960px;margin:0 auto}
+header{text-align:center;padding:0.8rem 0 1.2rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
+h1{font-size:1.4rem;font-weight:500;background:linear-gradient(135deg,var(--o),var(--y),var(--mint),var(--p));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.3rem}
+.sub{font-size:0.75rem;color:var(--dim);font-style:italic}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:0.8rem}
+.card h2{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--dim);margin-bottom:0.7rem;font-weight:700}
+input,textarea,select{width:100%;padding:0.7rem 0.9rem;border-radius:var(--r);border:1px solid var(--border);background:#0c1220;color:var(--ink);font-family:inherit;font-size:0.85rem;margin-bottom:0.5rem}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--y)}
+textarea{resize:vertical;min-height:60px;line-height:1.4}
+button{width:100%;padding:0.8rem;border-radius:var(--r);border:1px solid var(--y);background:linear-gradient(135deg,rgba(232,123,53,.2),rgba(229,193,90,.15));color:var(--y);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-size:0.78rem;cursor:pointer;margin-bottom:0.5rem;font-family:inherit}
+button:disabled{opacity:0.3;cursor:not-allowed}
+button.sec{background:transparent;border-color:var(--border);color:var(--dim)}
+button.danger{background:transparent;border-color:var(--err);color:var(--err)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.4rem;margin-top:0.5rem}
+.item{padding:0.5rem;border:1px solid var(--border);border-radius:var(--r);background:#0c1220;cursor:pointer;font-size:0.72rem;transition:.15s}
+.item:hover{border-color:var(--y)}
+.item.sel{background:linear-gradient(135deg,rgba(229,193,90,.15),rgba(232,123,53,.1));border-color:var(--y);color:var(--y)}
+.thumb{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:0.4rem;margin-top:0.6rem}
+.tc{position:relative;aspect-ratio:9/16;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:#000}
+.tc img{width:100%;height:100%;object-fit:cover;display:block}
+.tc.sel{border-color:var(--y);box-shadow:0 0 0 2px var(--y)}
+.tc .badge{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.7);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px}
+.tc.sel .badge{background:var(--y);color:#000;border-color:var(--y)}
+.log{background:#05050a;border:1px solid var(--border);border-radius:var(--r);padding:0.5rem;height:200px;overflow-y:auto;font-family:ui-monospace,monospace;font-size:0.68rem;line-height:1.5}
+.log .l{padding:0.15rem 0;color:#c8c8d0;word-break:break-word}
+.log .ok{color:var(--ok)}.log .err{color:var(--err)}.log .warn{color:var(--warn)}.log .api{color:var(--b)}
+.status{position:fixed;bottom:0;left:0;right:0;background:var(--panel2);border-top:1px solid var(--border);padding:0.7rem;font-size:0.75rem;text-align:center;transform:translateY(100%);transition:.3s;z-index:100;font-family:ui-monospace,monospace}
+.status.on{transform:translateY(0)}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--y);padding:0.7rem 1.2rem;border-radius:var(--r);font-size:0.8rem;z-index:1000;opacity:0;transition:.35s;max-width:90vw}
+.toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{border-left-color:var(--ok)}.toast.err{border-left-color:var(--err)}.toast.warn{border-left-color:var(--warn)}
+.hide{display:none!important}
+.pill{display:inline-block;padding:0.2rem 0.5rem;border-radius:99px;background:#0c1220;border:1px solid var(--border);font-size:0.65rem;color:var(--dim);margin-right:0.3rem;margin-bottom:0.3rem;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Matrix Studio</h1>
+<p class="sub">20 styles Agnes × 20 personnages Instagram → BD → vidéos 15s</p>
+</header>
+
+<div class="card">
+<h2>🔑 Clé API Agnes</h2>
+<input type="password" id="key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+<button id="saveKey">Enregistrer la clé</button>
+<div style="font-size:0.72rem;color:var(--dim);text-align:center;margin-top:0.3rem" id="keyStatus">Aucune clé enregistrée</div>
+</div>
