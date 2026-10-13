@@ -1,0 +1,577 @@
+f<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JT Multi-Partis</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a12;--bg2:#12121c;--bg3:#1a1a28;--panel:#16161f;--border:#2a2a3a;--ink:#e8e6e0;--dim:#8a8896;--faint:#4a4858;--acc:#e5c15a;--acc2:#e87b35;--ok:#4a9d6a;--err:#c85a4a;--warn:#d4a017;--lfi:#c53030;--rn:#1a2f5a;--ren:#ff8c00;--ps:#e83c78;--eelv:#4a9d5a;--r:6px;--fm:ui-monospace,Menlo,monospace}
+body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:1.5rem 1rem 24rem;font-size:15px;line-height:1.55;max-width:1200px;margin:0 auto}
+header{text-align:center;margin-bottom:1.2rem;padding:1rem 0}
+h1{font-size:1.8rem;font-weight:300;background:linear-gradient(135deg,var(--acc2),var(--acc),var(--lfi),var(--ps));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{font-size:.85rem;color:var(--dim);font-style:italic}
+.banner{background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--acc);padding:1rem;border-radius:var(--r);font-size:.8rem;color:var(--dim);margin-bottom:1rem}
+.banner strong{color:var(--ink)}.banner .hl{color:var(--acc)}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;margin-bottom:1rem}
+.panel.ok{box-shadow:inset 3px 0 0 var(--ok)}
+input,textarea,select{width:100%;padding:.85rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--ink);font-family:var(--fm);font-size:.8rem;margin-bottom:.6rem}
+textarea{resize:vertical;min-height:70px;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc)}
+label.lbl{display:block;font-size:.72rem;color:var(--dim);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.15em;font-weight:600}
+.btn{width:100%;padding:.85rem 1.2rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--ink);font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:.7rem;font-family:inherit;transition:all .2s}
+.btn:hover:not(:disabled){background:var(--bg3);border-color:var(--acc)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{border-color:var(--acc);background:linear-gradient(135deg,rgba(232,123,53,.2),rgba(229,193,90,.15));color:var(--acc);font-size:1.1rem;padding:1.4rem;letter-spacing:.25em}
+.btn-stop{border-color:var(--err);color:var(--err);background:transparent;display:none}
+.btn-stop.visible{display:block}
+.status{font-size:.75rem;padding:.6rem .9rem;border-radius:var(--r);margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;background:var(--bg2);color:var(--dim);border:1px solid var(--border)}
+.status.ok{background:rgba(74,157,106,.08);color:var(--ok);border-color:rgba(74,157,106,.3)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--faint);flex-shrink:0}
+.status.ok .dot{background:var(--ok)}
+.hint{font-size:.72rem;color:var(--dim);margin-top:.5rem}
+.hint a{color:var(--acc);text-decoration:none}
+.key-row{padding:.4rem .7rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.3rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--fm);font-size:.72rem}
+.key-row .key-id{color:var(--acc)}
+.key-row .key-state{font-size:.62rem;padding:.15rem .5rem;border-radius:2px;background:rgba(74,157,106,.15);color:var(--ok);border:1px solid rgba(74,157,106,.3);text-transform:uppercase;font-weight:700}
+.key-row .key-state.cool{background:rgba(212,160,23,.15);color:var(--warn);border-color:rgba(212,160,23,.3)}
+.key-row .key-state.dead{background:rgba(200,90,74,.15);color:var(--err);border-color:rgba(200,90,74,.3)}
+.section{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);margin-bottom:1rem;overflow:hidden}
+.section.hidden{display:none}
+.section-header{padding:1rem 1.2rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.section-title{font-size:.85rem;text-transform:uppercase;letter-spacing:.2em;font-weight:500;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.badge{padding:.15rem .55rem;color:var(--acc);border:1px solid var(--border);border-radius:2px;font-size:.6rem;letter-spacing:.15em;font-weight:600}
+.chevron{color:var(--faint);transition:transform .3s}
+.section.open .chevron{transform:rotate(180deg);color:var(--acc)}
+.section-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.section.open .section-body{max-height:20000px}
+.section-content{padding:0 1.2rem 1.2rem}
+.launcher-row{display:flex;gap:.7rem;flex-wrap:wrap}
+.launcher-row .btn{margin-bottom:0;flex:1;min-width:180px}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem;margin-top:.6rem}
+.news-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem;cursor:pointer;position:relative;transition:all .2s}
+.news-card:hover{border-color:var(--acc)}
+.news-card.selected{border-color:var(--ok);background:rgba(74,157,106,.06)}
+.news-card .news-parti{font-size:.65rem;font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:.4rem;display:inline-block;padding:.15rem .5rem;border-radius:2px}
+.news-parti.lfi{background:rgba(197,48,48,.2);color:#ff8080;border:1px solid var(--lfi)}
+.news-parti.rn{background:rgba(26,47,90,.3);color:#90b0e0;border:1px solid var(--rn)}
+.news-parti.ren{background:rgba(255,140,0,.2);color:#ffb060;border:1px solid var(--ren)}
+.news-parti.ps{background:rgba(232,60,120,.2);color:#ff90b0;border:1px solid var(--ps)}
+.news-parti.eelv{background:rgba(74,157,90,.2);color:#90d0a0;border:1px solid var(--eelv)}
+.news-card .news-title{font-size:.82rem;margin-bottom:.3rem;line-height:1.4}
+.news-card .news-source{font-size:.65rem;color:var(--faint);font-family:var(--fm)}
+.news-card .news-checkbox{position:absolute;top:.6rem;right:.6rem;width:20px;height:20px;border-radius:3px;border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent}
+.news-card.selected .news-checkbox{background:var(--ok);border-color:var(--ok);color:#fff}
+.script-view{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-top:.6rem;font-size:.85rem;line-height:1.7;max-height:520px;overflow-y:auto}
+.script-title{font-size:1rem;color:var(--acc);margin-bottom:.35rem}
+.script-logline{font-style:italic;color:var(--dim);margin-bottom:1rem;font-size:.8rem}
+.script-meta{font-size:.72rem;color:var(--faint);font-family:var(--fm);margin-bottom:1rem;padding-bottom:.8rem;border-bottom:1px dashed var(--border)}
+.script-scene{margin-bottom:1.1rem;padding-left:.9rem;border-left:2px solid var(--border)}
+.script-scene.lfi{border-left-color:var(--lfi)}.script-scene.rn{border-left-color:var(--rn)}
+.script-scene.ren{border-left-color:var(--ren)}.script-scene.ps{border-left-color:var(--ps)}
+.script-scene.eelv{border-left-color:var(--eelv)}
+.script-scene .sc-head{font-size:.78rem;color:var(--acc);font-weight:600;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.35rem}
+.script-scene .sc-line{margin-bottom:.25rem;font-size:.82rem}
+.script-scene .sc-label{display:inline-block;min-width:78px;color:var(--faint);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em}
+.script-scene .sc-dialogue{color:#f0d78a;font-style:italic}
+.script-scene .sc-overlay{color:#e8a87c;font-family:var(--fm);font-size:.78rem}
+.script-scene .sc-character{color:#b8d8e8}
+.script-scene .sc-shots{margin-top:.4rem;padding:.4rem .6rem;background:rgba(255,255,255,.02);border-radius:3px;font-size:.75rem;color:var(--dim);font-family:var(--fm)}
+.videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-top:.8rem}
+.scene-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .3s;display:flex;flex-direction:column}
+.scene-card.generating{border-color:var(--acc)}
+.scene-card.done{border-color:var(--ok)}
+.scene-card.error{border-color:var(--err)}
+.scene-card-header{padding:.55rem .75rem;font-size:.7rem;font-family:var(--fm);color:var(--dim);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);gap:.5rem}
+.scene-card-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.scene-card-body{padding:.7rem}
+.scene-card-body video{width:100%;border-radius:2px;background:#000;display:block}
+.scene-placeholder{width:100%;aspect-ratio:16/9;background:#0a0a12;border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:.7rem;font-family:var(--fm);flex-direction:column;gap:.5rem;text-align:center;padding:.5rem}
+.spinner-mini{width:14px;height:14px;border:2px solid rgba(229,193,90,.2);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.player-overlay{position:fixed;inset:0;background:#000;z-index:2000;display:none;align-items:center;justify-content:center;cursor:pointer}
+.player-overlay.visible{display:flex}
+#player-canvas{display:block;max-width:100vw;max-height:100vh;background:#000}
+.player-hint{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.55);font-size:.75rem;font-family:var(--fm);letter-spacing:.15em;text-transform:uppercase;background:rgba(0,0,0,.4);padding:.35rem .8rem;border-radius:3px}
+.player-controls{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-top:.6rem}
+.player-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem}
+.player-row .btn{margin-bottom:0;flex:1;min-width:140px}
+.status-bar{position:fixed;bottom:230px;left:0;right:0;background:var(--bg3);border-top:1px solid var(--border);padding:.75rem 1.1rem;font-size:.78rem;display:flex;align-items:center;gap:.7rem;transform:translateY(200%);transition:transform .35s;z-index:150;font-family:var(--fm)}
+.status-bar.visible{transform:translateY(0)}
+.spinner{width:12px;height:12px;border:2px solid rgba(229,193,90,.2);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+.debug-panel{position:fixed;bottom:0;left:0;right:0;height:220px;background:#05050a;border-top:2px solid var(--acc);z-index:200;display:flex;flex-direction:column;font-family:var(--fm);transition:height .3s ease}
+.debug-panel.collapsed{height:40px}
+.debug-header{display:flex;justify-content:space-between;align-items:center;padding:.4rem .7rem;background:#0f0f18;border-bottom:1px solid var(--border)}
+.debug-tabs{display:flex;gap:.25rem}
+.debug-tab{background:transparent;border:1px solid var(--border);color:var(--dim);font-size:.68rem;padding:.35rem .7rem;border-radius:3px;cursor:pointer;text-transform:uppercase;font-family:inherit}
+.debug-tab.active{color:var(--acc);border-color:var(--acc);background:rgba(229,193,90,.08)}
+.debug-actions{display:flex;gap:.3rem}
+.debug-actions button{background:transparent;border:1px solid var(--border);color:var(--dim);font-size:.62rem;padding:.28rem .55rem;border-radius:2px;cursor:pointer;font-family:inherit}
+.debug-body{flex:1;overflow-y:auto;padding:.6rem .8rem 1rem;font-size:.72rem;line-height:1.5;color:#c8c8d0}
+.debug-body.hidden{display:none}
+.j-entry{display:flex;gap:.6rem;padding:.25rem 0;border-bottom:1px dashed rgba(255,255,255,.04)}
+.j-time{font-family:var(--fm);font-size:.7rem;color:var(--faint);min-width:64px}
+.j-msg{color:#d8d8e0;flex:1;word-break:break-word}
+.j-entry.highlight .j-msg{color:var(--acc);font-weight:600}
+.j-entry.success .j-msg{color:var(--ok)}.j-entry.warn .j-msg{color:var(--warn)}.j-entry.error .j-msg{color:var(--err)}
+.debug-entry{margin-bottom:.3rem;padding:.25rem .4rem;border-left:2px solid transparent;font-size:.68rem;word-break:break-word}
+.debug-entry.info{border-left-color:var(--faint)}
+.debug-entry.success{border-left-color:var(--ok);background:rgba(74,157,106,.04)}
+.debug-entry.warn{border-left-color:var(--warn);background:rgba(212,160,23,.04)}
+.debug-entry.error{border-left-color:var(--err);background:rgba(200,90,74,.06);color:#f0a0a0}
+.debug-entry.api{border-left-color:var(--acc)}
+.debug-time{color:var(--faint);margin-right:.5rem;font-size:.65rem}
+.debug-cat{color:var(--acc);font-weight:600;margin-right:.4rem;font-size:.65rem}
+.hidden{display:none!important}
+.voice-toggle{display:flex;align-items:center;gap:.5rem;margin-top:.6rem;font-size:.75rem;color:var(--dim)}
+.voice-toggle input{width:auto;margin:0}
+@media(max-width:480px){h1{font-size:1.5rem}.videos-grid,.news-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>JT Multi-Partis</h1>
+<p class="subtitle">Un même journal, cinq angles — Wes Anderson cinématographique</p>
+</header>
+
+<div class="banner">
+<strong>Concept.</strong> Un journal télévisé cinématographique où chaque sujet est traité selon <strong class="hl">l'angle éditorial d'un parti</strong> : LFI, RN, Renaissance, PS, EÉLV. Un <strong class="hl">présentateur chaton unique</strong> ouvre et ferme le JT. Chaque reportage a <strong class="hl">un chat reporter aux couleurs du parti</strong>. Style Wes Anderson : symétrie, cuts, champ-contrechamp, 35mm, palette pastel.
+</div>
+
+<div class="panel" id="api-panel">
+<label class="lbl">Clés API Agnes — une par ligne</label>
+<textarea id="api-keys-input" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx&#10;sk-yyyyyyyyyyyyyyyyyyyyyyyy" rows="3"></textarea>
+<button type="button" class="btn" id="api-save-btn">Enregistrer les clés</button>
+<div class="status" id="api-status-line"><span class="dot"></span><span id="api-status-text">Aucune clé API enregistrée</span></div>
+<div id="api-keys-status"></div>
+<div class="hint">Clés sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a></div>
+</div>
+
+<div class="section open" id="section-settings">
+<div class="section-header" data-toggle="section-settings">
+<span class="section-title">⚙️ Réglages</span><span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<label class="lbl">Partis à inclure</label>
+<div id="partis-chips" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;"></div>
+<label class="lbl">Nombre de sujets par parti</label>
+<select id="news-per-parti-select"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
+<label class="lbl" style="margin-top:.8rem;">Durée des vidéos</label>
+<select id="duration-select"><option value="121">5s</option><option value="145" selected>6s</option><option value="169">7s</option></select>
+</div></div>
+</div>
+
+<button type="button" class="btn" id="load-news-btn">📡 Charger les actualités multi-partis</button>
+
+<div class="section hidden" id="section-news">
+<div class="section-header" data-toggle="section-news">
+<span class="section-title">📰 Sélection des sujets <span class="badge" id="news-badge">0</span></span><span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="hint" style="margin-bottom:.6rem;">Cliquez sur les sujets à inclure (au moins 4 recommandés).</div>
+<div class="news-grid" id="news-grid"></div>
+<div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap;">
+<button type="button" class="btn" id="select-all-btn" style="flex:1;min-width:100px;">Tout</button>
+<button type="button" class="btn" id="select-none-btn" style="flex:1;min-width:100px;">Rien</button>
+<button type="button" class="btn" id="select-one-per-parti-btn" style="flex:1;min-width:160px;">1 par parti</button>
+</div>
+</div></div>
+</div>
+
+<div class="panel">
+<div class="launcher-row">
+<button type="button" class="btn btn-primary" id="launch-btn" disabled>▶ Lancer le JT multi-partis</button>
+<button type="button" class="btn btn-stop" id="stop-btn">⏹ Arrêter</button>
+</div>
+</div>
+
+<div class="section hidden" id="section-script">
+<div class="section-header" data-toggle="section-script">
+<span class="section-title">📜 Scénario <span class="badge" id="script-badge">—</span></span><span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="script-view" id="script-view"></div>
+</div></div>
+</div>
+
+<div class="section hidden" id="section-videos">
+<div class="section-header" data-toggle="section-videos">
+<span class="section-title">🎞️ Séquences vidéo <span class="badge" id="videos-count">0</span></span><span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="videos-grid" id="videos-grid"></div>
+</div></div>
+</div>
+
+<div class="section hidden" id="section-player">
+<div class="section-header" data-toggle="section-player">
+<span class="section-title">▶ Diffusion du JT <span class="badge" id="player-badge">0</span></span><span class="chevron">▼</span>
+</div>
+<div class="section-body"><div class="section-content">
+<div class="player-controls">
+<div class="player-row">
+<button type="button" class="btn" id="play-film-btn" disabled>▶ Diffuser</button>
+<button type="button" class="btn" id="replay-btn" disabled>🔁 Rejouer</button>
+</div>
+<div class="voice-toggle"><input type="checkbox" id="voice-toggle" checked><label for="voice-toggle">Narration vocale française (TTS)</label></div>
+</div>
+</div></div>
+</div>
+
+<div class="status-bar" id="status-bar"><div class="spinner"></div><span id="status-text">Préparation…</span></div>
+<div class="toast" id="toast" style="position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--bg3);padding:.85rem 1.4rem;border-radius:6px;border-left:3px solid var(--acc);z-index:1000;opacity:0;transition:all .35s;max-width:90vw"><span id="toast-text">Message</span></div>
+
+<div class="debug-panel" id="debug-panel">
+<div class="debug-header" id="debug-header">
+<div class="debug-tabs">
+<button type="button" class="debug-tab active" id="tab-journal">📻 Journal</button>
+<button type="button" class="debug-tab" id="tab-tech">🖥️ Technique</button>
+</div>
+<div class="debug-actions">
+<button type="button" id="debug-copy-btn">Copier</button>
+<button type="button" id="debug-clear-btn">Effacer</button>
+<button type="button" id="debug-collapse-btn">−</button>
+</div>
+</div>
+<div class="debug-body" id="journal-body"></div>
+<div class="debug-body hidden" id="tech-body"></div>
+</div>
+
+<div class="player-overlay" id="player-overlay">
+<canvas id="player-canvas"></canvas>
+<div class="player-hint" id="player-hint-overlay">Échap ou clic pour quitter</div>
+</div>
+
+<script>
+const API_BASE='https://apihub.agnes-ai.com/v1';
+const POLL_BASE='https://apihub.agnes-ai.com/agnesapi';
+const MODEL_TEXT='agnes-2.5-flash';
+const MODEL_IMAGE='agnes-image-2.1-flash';
+const MODEL_VIDEO='agnes-video-v2.0';
+const FRAME_RATE=24;
+const VIDEO_FIRST_POLL_DELAY_SEC=60;
+const VIDEO_POLL_INTERVALS=[8,8,12,12,20,20,25];
+const VIDEO_MAX_POLL_ATTEMPTS=100;
+const KEYS_STORAGE='jt_mp_keys_v1';
+const DEBUG_MAX=800;
+
+const PARTIS=[
+{id:'lfi',name:'LFI',full:'La France insoumise',color:'#c53030',rss:'https://news.google.com/rss/search?q=La+France+insoumise&hl=fr&gl=FR&ceid=FR:fr',angle:'justice sociale, antiracisme, écologie radicale',chatBreed:'chat noir et blanc au regard vif',helmet:'casque de moto rétro rouge à visière dorée',outfit:'kimono de Shaolin rouge sang, ceinture moutarde'},
+{id:'rn',name:'RN',full:'Rassemblement National',color:'#1a2f5a',rss:'https://news.google.com/rss/search?q=Rassemblement+National&hl=fr&gl=FR&ceid=FR:fr',angle:'souveraineté nationale, contrôle migratoire',chatBreed:'chartreux bleu-gris à l\'expression sévère',helmet:'casque de pilote marine bleu nuit',outfit:'kimono bleu marine, ceinture blanche'},
+{id:'ren',name:'Renaissance',full:'Renaissance',color:'#ff8c00',rss:'https://news.google.com/rss/search?q=Renaissance+Macron&hl=fr&gl=FR&ceid=FR:fr',angle:'réformes progressistes, europe, innovation',chatBreed:'siamois élancé aux yeux bleus perçants',helmet:'casque chromé à visière orange',outfit:'kimono orange clair, ceinture bleu ciel'},
+{id:'ps',name:'PS',full:'Parti Socialiste',color:'#e83c78',rss:'https://news.google.com/rss/search?q=Parti+Socialiste+Faure&hl=fr&gl=FR&ceid=FR:fr',angle:'social-démocratie, europe sociale',chatBreed:'british shorthair rose sable au regard bienveillant',helmet:'casque rose poudré à bandes crème',outfit:'kimono rose, ceinture blanche'},
+{id:'eelv',name:'EÉLV',full:'Europe Écologie Les Verts',color:'#4a9d5a',rss:'https://news.google.com/rss/search?q=Europe+Ecologie+Les+Verts&hl=fr&gl=FR&ceid=FR:fr',angle:'écologie politique, transition énergétique',chatBreed:'chat norvégien doré tigré aux yeux verts',helmet:'casque vert forêt à visière transparente',outfit:'kimono vert, ceinture feuille dorée'}
+];
+
+const PALETTES=[
+{id:'pink-mint',label:'Rose poudré & Menthe',colors:['#F4C2C2','#A8D8B9','#E5B95A','#F5F0E1','#7B9FB0']},
+{id:'coral-teal',label:'Corail & Turquoise',colors:['#E8A87C','#85CDCA','#F4E4BA','#D4A5A5','#7C6A8B']},
+{id:'mustard-blue',label:'Moutarde & Bleu ciel',colors:['#F7D794','#778BEB','#E77F67','#F1E7D0','#3B4B55']},
+{id:'lavender',label:'Lavande & Ocre',colors:['#C5B7D9','#E5B95A','#F4A6A6','#F5EFE0','#7A8B7E']},
+{id:'sage-blush',label:'Sauge & Blush',colors:['#B8C9A8','#F1C6C6','#E8B44A','#F5F0E1','#5B6E7A']}
+];
+
+const state={keyPool:[],isRunning:false,stopRequested:false,selectedPartis:new Set(['lfi','rn','ren','ps','eelv']),newsPerParti:2,durationFrames:145,allNews:[],selectedNews:new Set(),script:null,videos:[],palette:null,presenter:null,isPlayingFilm:false,playRAF:null,voiceEnabled:true,workingPollUrlBuilder:null};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function setStatus(t){const b=document.getElementById('status-bar');const s=document.getElementById('status-text');if(!b||!s)return;if(t){b.classList.add('visible');s.textContent=t}else b.classList.remove('visible')}
+let toastTimeout=null;
+function showToast(msg,type='success',d=2800){const t=document.getElementById('toast');const x=document.getElementById('toast-text');if(!t||!x)return;t.style.borderLeftColor=type==='error'?'var(--err)':type==='warn'?'var(--warn)':'var(--ok)';x.textContent=msg;t.style.transform='translateX(-50%) translateY(0)';t.style.opacity='1';clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>{t.style.transform='translateX(-50%) translateY(-120px)';t.style.opacity='0'},d)}
+function nowTime(){return new Date().toLocaleTimeString('fr-FR',{hour12:false})}
+function sanitize(text){if(text==null)return'';return String(text).replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\u2013/g,'-').replace(/\u2014/g,'--').replace(/\u2026/g,'...').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\u00A0/g,' ')}
+
+function journalLog(msg,level){level=level||'info';const body=document.getElementById('journal-body');if(!body)return;const icons={info:'·',highlight:'▶',success:'✅',warn:'⚠️',error:'❌',news:'📡',script:'✍️',video:'🎥',play:'🎬',key:'🔑'};const entry=document.createElement('div');entry.className='j-entry '+level;entry.innerHTML='<span class="j-time">'+esc(nowTime())+'</span><span>'+esc(icons[level]||'·')+'</span><span class="j-msg">'+esc(msg)+'</span>';body.appendChild(entry);body.scrollTop=body.scrollHeight;while(body.children.length>DEBUG_MAX)body.removeChild(body.firstChild)}
+
+let debugCount=0,debugEntries=[],debugCollapsed=false;
+function debugLog(level,category,message){const body=document.getElementById('tech-body');if(!body)return;const time=nowTime();const entry=document.createElement('div');entry.className='debug-entry '+level;entry.innerHTML='<span class="debug-time">'+time+'</span><span class="debug-cat">['+esc(category)+']</span>'+esc(message);body.appendChild(entry);debugEntries.push({time,level,category,message});if(debugEntries.length>DEBUG_MAX)debugEntries.shift();while(body.children.length>DEBUG_MAX)body.removeChild(body.firstChild);body.scrollTop=body.scrollHeight;debugCount++}
+function clearDebug(){document.getElementById('tech-body').innerHTML='';document.getElementById('journal-body').innerHTML='';debugEntries=[];debugCount=0}
+function copyDebug(){const lines=debugEntries.map(e=>e.time+' ['+e.category+'] '+e.message).join('\n');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(lines).then(()=>showToast('Journal technique copié','success',1800)).catch(()=>showToast('Copie impossible dans ce navigateur','error',2200))}else{showToast('Copie impossible dans ce navigateur','error',2200)}}
+
+function updateApiStatus(){const statusText=document.getElementById('api-status-text');const statusLine=document.getElementById('api-status-line');const stored=JSON.parse(localStorage.getItem('jt_mp_keys_v1')||'[]');const keys=(Array.isArray(stored)?stored:[]).filter(Boolean);state.keyPool=keys;if(!statusText||!statusLine)return;statusLine.classList.toggle('ok',keys.length>0);const dot=statusLine.querySelector('.dot');if(dot)dot.style.background=keys.length>0?'var(--ok)':'var(--faint)';statusText.textContent=keys.length>0?keys.length+' clé(s) API enregistrée(s)':'Aucune clé API enregistrée';const box=document.getElementById('api-keys-status');if(box){box.innerHTML='';if(keys.length){const list=document.createElement('div');list.className='key-row-list';keys.slice(0,5).forEach((k,i)=>{const row=document.createElement('div');row.className='key-row';row.innerHTML='<span class="key-id">'+esc(k.slice(0,8)+'…')+'</span><span class="key-state '+(i%2?'cool':'')+'">'+(i%2?'active':'OK')+'</span>';list.appendChild(row)});box.appendChild(list)}}}
+
+function saveApiKeys(){const input=document.getElementById('api-keys-input');const raw=(input?input.value:'');const keys=raw.split(/\n|,/).map(s=>s.trim()).filter(Boolean);localStorage.setItem('jt_mp_keys_v1',JSON.stringify(keys));state.keyPool=keys;updateApiStatus();showToast(keys.length?'Clés enregistrées':'Aucune clé enregistrée','success',1800);debugLog('success','keys','Clés enregistrées: '+keys.length);}
+
+function populateApiKeys(){const input=document.getElementById('api-keys-input');const keys=JSON.parse(localStorage.getItem('jt_mp_keys_v1')||'[]');if(input&&Array.isArray(keys)&&keys.length){input.value=keys.join('\n')}}
+
+function uniqNews(items){return items.filter((item,index,array)=>array.findIndex(a=>a.id===item.id)===index)}
+
+function buildMockNews(){const list=[];PARTIS.forEach((parti)=>{for(let i=1;i<=6;i++){list.push({id:parti.id+'-'+i,parti:parti.id,title:parti.name+' — Sujet '+i+': '+['Budget social','Sécurité','Mobilités','Énergie','Education','Emploi'][i-1],source:['Le Monde','France 24','AFP','Les Échos','Libération','BFM'][i-1],summary:'Angle '+parti.angle+' — dossier prioritaire pour '+parti.full+'.',angle:parti.angle});}});return list}
+
+function setSectionState(sectionId,open){const section=document.getElementById(sectionId);if(!section)return;section.classList.toggle('open',open);section.classList.toggle('hidden',!open);}
+
+function renderPartisChips(){const container=document.getElementById('partis-chips');if(!container)return;container.innerHTML='';PARTIS.forEach((parti)=>{const chip=document.createElement('button');chip.type='button';chip.className='btn';chip.style.flex='1';chip.style.minWidth='120px';chip.style.padding='.55rem .8rem';chip.style.marginBottom='0';chip.style.borderColor=state.selectedPartis.has(parti.id)?'var(--ok)':'var(--border)';chip.style.background=state.selectedPartis.has(parti.id)?'rgba(74,157,106,.12)':'var(--bg2)';chip.style.color=state.selectedPartis.has(parti.id)?'var(--ok)':'var(--ink)';chip.textContent=parti.name;chip.addEventListener('click',()=>{if(state.selectedPartis.has(parti.id)&&state.selectedPartis.size===1){showToast('Au moins un parti doit rester sélectionné','warn',1800);return;}if(state.selectedPartis.has(parti.id)){state.selectedPartis.delete(parti.id)}else{state.selectedPartis.add(parti.id)}renderPartisChips();renderNewsGrid();updateLaunchState();});container.appendChild(chip);});}
+
+function getPartisBySelection(){return PARTIS.filter(p=>state.selectedPartis.has(p.id));}
+
+function renderNewsGrid(){const grid=document.getElementById('news-grid');if(!grid)return;state.allNews=state.allNews.length?state.allNews:buildMockNews();const visible=state.allNews.filter(item=>state.selectedPartis.has(item.parti));grid.innerHTML='';if(!visible.length){grid.innerHTML='<div class="hint">Aucun sujet disponible pour cette sélection.</div>';return;}visible.forEach(item=>{const card=document.createElement('div');card.className='news-card'+(state.selectedNews.has(item.id)?' selected':'');card.dataset.id=item.id;card.innerHTML='<span class="news-parti '+item.parti+'">'+esc(item.parti.toUpperCase())+'</span><div class="news-title">'+esc(item.title)+'</div><div class="news-source">'+esc(item.source)+'</div><div class="news-checkbox">✓</div>';card.addEventListener('click',()=>{if(state.selectedNews.has(item.id)){state.selectedNews.delete(item.id)}else{state.selectedNews.add(item.id)}renderNewsGrid();updateLaunchState();});grid.appendChild(card);});document.getElementById('news-badge').textContent=state.selectedNews.size;}
+
+function selectAllNews(){const visible=state.allNews.filter(item=>state.selectedPartis.has(item.parti));visible.forEach(item=>state.selectedNews.add(item.id));renderNewsGrid();updateLaunchState();}
+
+function selectNoneNews(){state.selectedNews.clear();renderNewsGrid();updateLaunchState();}
+
+function selectOnePerParti(){state.selectedNews.clear();const byParti=getPartisBySelection();byParti.forEach((parti)=>{const first=state.allNews.filter(item=>item.parti===parti.id)[0];if(first)state.selectedNews.add(first.id);});renderNewsGrid();updateLaunchState();}
+
+function updateLaunchState(){const launchBtn=document.getElementById('launch-btn');const count=state.selectedNews.size;launchBtn.disabled=(count<4);launchBtn.textContent='▶ Lancer le JT multi-partis ('+count+')';document.getElementById('news-badge').textContent=String(count);}
+
+function buildScenario(){const base=Array.from(state.selectedNews).map(id=>state.allNews.find(item=>item.id===id)).filter(Boolean);const selected=base.slice(0,Math.max(4,Math.min(base.length,Math.max(4, state.newsPerParti*state.selectedPartis.size))));const script={title:'JT Multi-Partis',summary:'Reportages sélectionnés selon les angles politiques.',scenes:[]};const intro={parti:'presenter',text:'Bonsoir, le journal de ce soir, pensé comme une lecture de l’actualité à travers cinq regards politiques nettement différenciés.'};script.scenes.push(intro);selected.forEach((item,index)=>{const parti=PARTIS.find(p=>p.id===item.parti);script.scenes.push({parti:item.parti,title:item.title,source:item.source,summary:item.summary,angle:item.angle,voice:`${parti.full} : ${parti.angle}.`,sequence:index+1});});script.scenes.push({parti:'presenter',text:'Et maintenant, le point de synthèse du débat : l’actualité vue par le prisme du parti, sans jamais perdre le fil du journal.'});script.scenes.push({parti:'presenter',text:'Merci de suivre ce JT, en couleurs, en rythme et en contrepoints.'});return script;}
+
+function renderScriptView(){const scriptContainer=document.getElementById('script-view');if(!scriptContainer)return;const script=buildScenario();const html=[];html.push('<div class="script-title">'+esc(script.title)+'</div>');html.push('<div class="script-logline">'+esc('Scénario généré • '+script.scenes.length+' séquences')+'</div>');html.push('<div class="script-meta">'+esc('Sélection : '+state.selectedNews.size+' sujets • Parties : '+Array.from(state.selectedPartis).join(', '))+'</div>');script.scenes.forEach((scene,index)=>{const parti=scene.parti==='presenter'?null:PARTIS.find(p=>p.id===scene.parti);const className=parti?parti.id:'presenter';const label=parti?parti.name:'Présentateur';html.push('<div class="script-scene '+esc(className)+'">');html.push('<div class="sc-head">'+esc((index===0?'Ouverture':index===script.scenes.length-1?'Clôture':'Reportage '+index))+'</div>');if(parti){html.push('<div class="sc-line"><span class="sc-label">Parti</span><span class="sc-character">'+esc(parti.full)+'</span></div>');html.push('<div class="sc-line"><span class="sc-label">Sujet</span><span class="sc-dialogue">'+esc(scene.title)+'</span></div>');html.push('<div class="sc-line"><span class="sc-label">Angle</span><span class="sc-overlay">'+esc(scene.angle)+'</span></div>');html.push('<div class="sc-line"><span class="sc-label">Source</span><span class="sc-overlay">'+esc(scene.source)+'</span></div>');}else{html.push('<div class="sc-line"><span class="sc-label">VO</span><span class="sc-dialogue">'+esc(scene.text)+'</span></div>');}html.push('</div>');});scriptContainer.innerHTML=html.join('');document.getElementById('script-badge').textContent=String(script.scenes.length);}
+
+function drawFilmFrame(ctx,w,h,progress){ctx.fillStyle='#070b12';ctx.fillRect(0,0,w,h);const grad=ctx.createLinearGradient(0,0,w,0);grad.addColorStop(0,'#0f172a');grad.addColorStop(.3,'#1a2235');grad.addColorStop(.7,'#0d1b1b');grad.addColorStop(1,'#12141d');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);const barH=28;ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(0,h-barH,w,barH);ctx.fillStyle='#e5c15a';ctx.fillRect(0,h-barH,w*progress,barH);ctx.fillStyle='rgba(255,255,255,.9)';ctx.font='bold 28px sans-serif';ctx.fillText('JT Multi-Partis',30,90);ctx.font='18px sans-serif';ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText('Le journal vu par les partis',30,120);ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(30,170);ctx.lineTo(w-30,170);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.8)';ctx.font='16px sans-serif';ctx.fillText('Présentation • synthèse • ouverture',30,205);ctx.fillStyle='rgba(229,193,90,.9)';ctx.fillRect(w-200,30,150,70);ctx.fillStyle='#0b0d12';ctx.font='bold 22px sans-serif';ctx.fillText('LIVE',w-170,72);}
+
+function renderVideosGrid(){const grid=document.getElementById('videos-grid');if(!grid)return;grid.innerHTML='';const selection=Array.from(state.selectedNews).map(id=>state.allNews.find(item=>item.id===id)).filter(Boolean);selection.forEach((item,index)=>{const card=document.createElement('div');card.className='scene-card generating';card.innerHTML='<div class="scene-card-header"><span class="scene-card-title">'+esc(item.title)+'</span><span>0% </span></div><div class="scene-card-body"><div class="scene-placeholder"><span class="spinner-mini"></span><span>Génération video…</span></div></div>' ;grid.appendChild(card);});document.getElementById('videos-count').textContent=String(selection.length);}
+
+function openPlayer(){const overlay=document.getElementById('player-overlay');const canvas=document.getElementById('player-canvas');if(!overlay||!canvas)return;overlay.classList.add('visible');const ctx=canvas.getContext('2d');const w=window.innerWidth*0.9;const h=window.innerHeight*0.85;canvas.width=w;canvas.height=h;let t=0;const step=()=>{if(!overlay.classList.contains('visible'))return;drawFilmFrame(ctx,w,h,Math.min(1,t/1.6));t+=0.015;if(t<1.6){requestAnimationFrame(step);}else if(state.isPlayingFilm){setTimeout(()=>{overlay.classList.remove('visible');},1000);}};requestAnimationFrame(step);}
+
+function startJT(){if(state.selectedNews.size<4){showToast('Sélectionnez au moins 4 sujets pour lancer le JT','warn',2200);return;}state.isRunning=true;state.stopRequested=false;showToast('JT en cours de préparation…','success',1800);renderScriptView();renderVideosGrid();setStatus('Préparation du JT…');document.getElementById('section-script').classList.remove('hidden');document.getElementById('section-videos').classList.remove('hidden');document.getElementById('section-player').classList.remove('hidden');setSectionState('section-script',true);setSectionState('section-videos',true);setSectionState('section-player',true);document.getElementById('play-film-btn').disabled=false;document.getElementById('replay-btn').disabled=false;document.getElementById('stop-btn').classList.add('visible');debugLog('success','jt','Lancement du JT avec '+state.selectedNews.size+' sujets');}
+
+function stopJT(){state.isRunning=false;state.stopRequested=true;showToast('JT arrêté','warn',1800);document.getElementById('stop-btn').classList.remove('visible');setStatus('');debugLog('warn','jt','Arrêt du JT demandé');}
+
+function playFilm(){if(!state.isRunning){showToast('Aucun JT en cours','warn',1800);return;}state.isPlayingFilm=true;openPlayer();showToast('Diffusion du JT en cours','success',1800);debugLog('play','jt','Diffusion du film');}
+
+function replayFilm(){state.isPlayingFilm=true;openPlayer();showToast('Rediffusion du JT','success',1800);debugLog('play','jt','Relecture du JT');}
+
+function bindEvents(){document.getElementById('api-save-btn').addEventListener('click',saveApiKeys);document.getElementById('load-news-btn').addEventListener('click',()=>{state.allNews=buildMockNews();renderNewsGrid();document.getElementById('section-news').classList.remove('hidden');setSectionState('section-news',true);showToast('Actualités chargées','success',1800);});document.getElementById('launch-btn').addEventListener('click',startJT);document.getElementById('stop-btn').addEventListener('click',stopJT);document.getElementById('play-film-btn').addEventListener('click',playFilm);document.getElementById('replay-btn').addEventListener('click',replayFilm);document.getElementById('select-all-btn').addEventListener('click',selectAllNews);document.getElementById('select-none-btn').addEventListener('click',selectNoneNews);document.getElementById('select-one-per-parti-btn').addEventListener('click',selectOnePerParti);document.getElementById('news-per-parti-select').addEventListener('change',function(){state.newsPerParti=Number(this.value)||2;renderNewsGrid();renderScriptView();});document.getElementById('duration-select').addEventListener('change',function(){state.durationFrames=Number(this.value)||145;showToast('Durée de diffusion mise à jour','success',1200);});document.getElementById('voice-toggle').addEventListener('change',function(){state.voiceEnabled=this.checked;showToast(state.voiceEnabled?'Narration vocale active':'Narration vocale désactivée','success',1200);});document.querySelectorAll('[data-toggle]').forEach((el)=>{el.addEventListener('click',()=>{const id=el.dataset.toggle;const target=document.getElementById(id);if(!target)return;const open=!target.classList.contains('open');target.classList.toggle('open',open);target.classList.toggle('hidden',!open);});});document.getElementById('debug-clear-btn').addEventListener('click',clearDebug);document.getElementById('debug-collapse-btn').addEventListener('click',()=>{const panel=document.getElementById('debug-panel');if(!panel)return;panel.classList.toggle('collapsed');});document.getElementById('debug-copy-btn').addEventListener('click',copyDebug);document.getElementById('player-overlay').addEventListener('click',()=>document.getElementById('player-overlay').classList.remove('visible'));}
+
+function initUi(){populateApiKeys();updateApiStatus();renderPartisChips();state.allNews=buildMockNews();renderNewsGrid();updateLaunchState();bindEvents();journalLog('JT multi-partis prêt','success');debugLog('success','boot','Page initialisée');setStatus('Prêt');}
+
+initUi();Toast('Console copiée','success')).catch(()=>{})}
+function toggleDebugCollapse(){const p=document.getElementById('debug-panel');const b=document.getElementById('debug-collapse-btn');if(!p||!b)return;debugCollapsed=!debugCollapsed;p.classList.toggle('collapsed',debugCollapsed);b.textContent=debugCollapsed?'+':'−'}
+function switchTab(tab){const j=document.getElementById('journal-body');const t=document.getElementById('tech-body');const tj=document.getElementById('tab-journal');const tt=document.getElementById('tab-tech');if(tab==='journal'){j.classList.remove('hidden');t.classList.add('hidden');tj.classList.add('active');tt.classList.remove('active')}else{t.classList.remove('hidden');j.classList.add('hidden');tt.classList.add('active');tj.classList.remove('active');t.scrollTop=t.scrollHeight}}
+function userIsReading(){const sy=window.scrollY,vh=window.innerHeight,dh=document.documentElement.scrollHeight;return(sy+vh)>=dh-260}
+function revealSection(id){const el=document.getElementById(id);if(!el)return;el.classList.remove('hidden');el.classList.add('open');if(!userIsReading())setTimeout(()=>{const y=el.getBoundingClientRect().top+window.scrollY-40;window.scrollTo({top:y,behavior:'smooth'})},200)}
+
+// Multi-clés API
+function getStoredKeys(){try{const r=localStorage.getItem(KEYS_STORAGE);if(!r)return[];const a=JSON.parse(r);return Array.isArray(a)?a.filter(k=>typeof k==='string'&&k.trim()):[]}catch(e){return[]}}
+function setStoredKeys(k){try{localStorage.setItem(KEYS_STORAGE,JSON.stringify(k))}catch(e){}}
+function refreshKeyPool(){const s=getStoredKeys();const o=state.keyPool||[];state.keyPool=s.map(k=>{const e=o.find(p=>p.key===k);return e||{key:k,lastUsed:0,cooldownUntil:0,active:true,errorCount:0}})}
+function hasActiveKey(){return state.keyPool.some(k=>k.active)}
+function getReadyKey(){const now=Date.now();const active=state.keyPool.filter(k=>k.active);if(!active.length)return{key:null,waitMs:0};const ready=active.filter(k=>!k.cooldownUntil||k.cooldownUntil<=now);if(!ready.length){const s=active.reduce((a,b)=>(a.cooldownUntil||0)<(b.cooldownUntil||0)?a:b);return{key:null,waitMs:Math.max(1000,(s.cooldownUntil||0)-now)}}ready.sort((a,b)=>(a.lastUsed||0)-(b.lastUsed||0));return{key:ready[0],waitMs:0}}
+async function acquireKey(label){while(true){if(state.stopRequested)throw new Error('Arrêt demandé');const{key,waitMs}=getReadyKey();if(key){key.lastUsed=Date.now();return key}if(!waitMs)throw new Error('Aucune clé API active');debugLog('warn',label,'Cooldown '+Math.round(waitMs/1000)+'s');setStatus('Cooldown '+Math.round(waitMs/1000)+'s');await sleep(waitMs)}}
+function renderKeysStatus(){const el=document.getElementById('api-keys-status');if(!el)return;if(!state.keyPool.length){el.innerHTML='';return}const now=Date.now();el.innerHTML=state.keyPool.map((k,i)=>{let sh='<span class="key-state">Active</span>';if(!k.active)sh='<span class="key-state dead">Inactive</span>';else if(k.cooldownUntil>now){const s=Math.ceil((k.cooldownUntil-now)/1000);sh='<span class="key-state cool">Cool '+s+'s</span>'}return'<div class="key-row"><span class="key-id">#'+(i+1)+' · '+esc(k.key.slice(0,8))+'…'+esc(k.key.slice(-4))+'</span>'+sh+'</div>'}).join('')}
+function saveKeysFromUI(){const input=document.getElementById('api-keys-input');if(!input)return;const keys=(input.value||'').split(/\r?\n/).map(l=>l.trim()).filter(l=>l);const valid=keys.filter(k=>k.startsWith('sk-'));setStoredKeys(valid);refreshKeyPool();updateApiPanel();showToast(valid.length+' clé(s) enregistrée(s) ✓','success');journalLog(valid.length+' clé(s) API active(s).','key')}
+function updateApiPanel(){const panel=document.getElementById('api-panel');const input=document.getElementById('api-keys-input');const line=document.getElementById('api-status-line');const text=document.getElementById('api-status-text');if(!panel||!input||!line||!text)return;refreshKeyPool();const n=state.keyPool.length;if(n){panel.classList.add('ok');line.classList.add('ok');text.textContent=n+' clé(s) active(s) · parallélisme : '+n;input.value=state.keyPool.map(k=>k.key).join('\n')}else{panel.classList.remove('ok');line.classList.remove('ok');text.textContent='Aucune clé API enregistrée';input.value=''}renderKeysStatus();updateButtons()}
+
+// API FETCH
+async function apiFetch(url,options,label,maxAttempts){
+  options=options||{};label=label||'API';maxAttempts=maxAttempts||6;
+  let lastErr=null;
+  for(let attempt=0;attempt<maxAttempts;attempt++){
+    if(state.stopRequested)throw new Error('Arrêt demandé');
+    let keyObj=null;
+    try{keyObj=await acquireKey(label)}catch(e){throw e}
+    const headers=Object.assign({},options.headers||{},{'Authorization':'Bearer '+keyObj.key});
+    const finalOptions=Object.assign({},options,{headers});
+    try{
+      const res=await fetch(url,finalOptions);
+      let retryAfter=0;try{retryAfter=parseInt(res.headers.get('Retry-After')||'0',10)||0}catch(e){}
+      let errorText='';if(!res.ok){try{errorText=(await res.clone().text()).slice(0,1200)}catch(e){}}
+      debugLog(res.ok?'success':'warn','REP '+label,'HTTP '+res.status+' clé '+keyObj.key.slice(-4));
+      if(res.ok){keyObj.errorCount=0;return res}
+      if([400,401,403,404].includes(res.status)){
+        if(res.status===401||res.status===403){keyObj.errorCount=(keyObj.errorCount||0)+1;if(keyObj.errorCount>=3){keyObj.active=false;renderKeysStatus()}}
+        const err=new Error('HTTP '+res.status);err.status=res.status;err.body=errorText;throw err;
+      }
+      if(res.status===429){
+        const wait=retryAfter>0?retryAfter:Math.min(120,20+attempt*15);
+        keyObj.cooldownUntil=Date.now()+wait*1000;
+        debugLog('warn','RATELIMIT','Clé '+keyObj.key.slice(-4)+' cooldown '+wait+'s');
+        renderKeysStatus();
+        const{key:next}=getReadyKey();
+        if(next&&next!==keyObj)continue;
+        await sleep(Math.min(wait*1000,3000));continue;
+      }
+      if([500,502,503,504,520,522,524].includes(res.status)){
+        await sleep(Math.min(60,8+attempt*6)*1000);continue;
+      }
+      await sleep(Math.min(60,6+attempt*5)*1000);
+    }catch(e){
+      if(e.message==='Arrêt demandé')throw e;
+      if(e.status&&[400,401,403,404].includes(e.status))throw e;
+      lastErr=e;
+      await sleep(Math.min(45,4+attempt*4)*1000);
+    }
+  }
+  throw lastErr||new Error('Tentatives épuisées pour '+label);
+}
+
+// JSON PARSER
+function balanceJson(text){let ob=0,ok=0,ins=false,esc=false;for(let i=0;i<text.length;i++){const ch=text[i];if(esc){esc=false;continue}if(ch==='\\'){esc=true;continue}if(ch==='"'){ins=!ins;continue}if(ins)continue;if(ch==='{')ob++;else if(ch==='}')ob--;else if(ch==='[')ok++;else if(ch===']')ok--}let r=text;if(ins)r+='"';while(ok>0){r+=']';ok--}while(ob>0){r+='}';ob--}return r}
+function fixUnquotedKeys(text){let out='';let i=0,n=text.length,ins=false,esc=false;const st=[];let last='{';while(i<n){const ch=text[i];if(esc){out+=ch;esc=false;i++;continue}if(ch==='\\'){out+=ch;esc=true;i++;continue}if(ins){out+=ch;if(ch==='"')ins=false;i++;continue}if(ch==='"'){ins=true;out+=ch;i++;continue}if(ch==='{'){st.push('{');last='{';out+=ch;i++;continue}if(ch==='['){st.push('[');last='[';out+=ch;i++;continue}if(ch==='}'||ch===']'){if(st.length)st.pop();last=ch;out+=ch;i++;continue}if(ch===','||ch===':'){last=ch;out+=ch;i++;continue}if(/\s/.test(ch)){out+=ch;i++;continue}const top=st[st.length-1];if((last==='{'||last===',')&&top==='{'&&/[A-Za-z_$]/.test(ch)){let j=i;while(j<n&&/[A-Za-z0-9_$]/.test(text[j]))j++;let k=j;while(k<n&&/\s/.test(text[k]))k++;if(text[k]===':'){out+='"'+text.slice(i,j)+'"';i=j;continue}}out+=ch;i++}return out}
+function fixMissingCommas(text){let out='';let i=0,n=text.length,ins=false,esc=false,jcv=false;while(i<n){const ch=text[i];if(esc){out+=ch;esc=false;i++;continue}if(ch==='\\'){out+=ch;esc=true;i++;continue}if(ins){out+=ch;if(ch==='"'){ins=false;let j=i+1;while(j<n&&/\s/.test(text[j]))j++;jcv=(text[j]!==':')}i++;continue}if(/\s/.test(ch)){out+=ch;i++;continue}if(jcv&&ch!==','&&ch!=='}'&&ch!==']'&&ch!==':'){out+=',';jcv=false}if(ch==='"'){ins=true;jcv=false;out+=ch;i++;continue}if(ch==='{'||ch==='['){jcv=false;out+=ch;i++;continue}if(ch==='}'||ch===']'){jcv=true;out+=ch;i++;continue}if(ch===','||ch===':'){jcv=false;out+=ch;i++;continue}jcv=false;out+=ch;i++}return out}
+function repairJson(text){if(!text)return null;let c=String(text).trim();const fm=c.match(/```(?:json)?\s*([\s\S]*?)```/);if(fm)c=fm[1].trim();const fb=c.indexOf('{');if(fb<0)return null;c=c.slice(fb);const lb=c.lastIndexOf('}');if(lb>0)c=c.slice(0,lb+1);let out='',ins=false,del='"',esc=false;for(let i=0;i<c.length;i++){const ch=c[i];if(esc){out+='\\'+ch;esc=false;continue}if(ch==='\\'){esc=true;continue}if(ch==='"'||ch==="'"){if(!ins){ins=true;del=ch;out+='"';continue}if(ch===del){ins=false;out+='"';continue}if(ch==='"'){out+='\\"';continue}out+="'";continue}if(ins){if(ch==='\n'){out+='\\n';continue}if(ch==='\r'){out+='\\r';continue}if(ch==='\t'){out+='\\t';continue}if(ch.charCodeAt(0)<32){out+='\\u'+ch.charCodeAt(0).toString(16).padStart(4,'0');continue}}out+=ch}if(esc)out+='\\';if(ins)out+='"';try{out=fixUnquotedKeys(out)}catch(e){}try{out=fixMissingCommas(out)}catch(e){}out=out.replace(/,\s*([}\]])/g,'$1');return out}
+function extractJson(text){if(!text)return null;const r=repairJson(text);if(!r)return null;try{return JSON.parse(r)}catch(e1){debugLog('warn','PARSE','Essai 1 : '+e1.message);try{return JSON.parse(balanceJson(r))}catch(e2){debugLog('error','PARSE','Essai 2 : '+e2.message);return null}}}
+
+// RSS
+async function rss2json(url){const r=await fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(url));if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(d.status!=='ok')throw new Error(d.status);return(d.items||[]).map((it,i)=>({title:it.title||'',link:it.link||'',source:it.author||'Google News',rank:i+1}))}
+async function rssAllOrigins(url){const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url));if(!r.ok)throw new Error('HTTP '+r.status);return parseXml(await r.text())}
+async function rssCodeTabs(url){const r=await fetch('https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(url));if(!r.ok)throw new Error('HTTP '+r.status);return parseXml(await r.text())}
+function parseXml(t){const doc=new DOMParser().parseFromString(t,'text/xml');const items=doc.querySelectorAll('item');const out=[];items.forEach((it,i)=>{if(i>=20)return;const title=it.querySelector('title')?.textContent||'';const link=it.querySelector('link')?.textContent||'';const source=it.querySelector('source')?.textContent||'';if(title)out.push({title,link,source,rank:i+1})});return out}
+async function fetchParti(parti,count){const methods=[rss2json,rssAllOrigins,rssCodeTabs];for(const m of methods){try{const items=await m(parti.rss);if(items&&items.length)return items.slice(0,count).map(it=>({...it,parti:parti.id,partiName:parti.name,partiFull:parti.full}))}catch(e){debugLog('warn','RSS-'+parti.id,e.message)}}return getDemo(parti,count)}
+function getDemo(parti,count){
+  const demo={lfi:['Blocage des lycées : LFI propose une commission d\'enquête','Panot appelle à la démission du ministre'],rn:['Le RN dénonce un budget anti-français','Marine Le Pen critique la politique migratoire'],ren:['Renaissance défend la réforme des retraites','Attal annonce un plan de relance'],ps:['Le PS propose un pacte social','Faure critique la politique budgétaire'],eelv:['EÉLV dénonce un scandale climatique','Les Verts proposent une transition écologique']};
+  return(demo[parti.id]||demo.lfi).slice(0,count).map((title,i)=>({title,link:'#',source:'Démo',rank:i+1,parti:parti.id,partiName:parti.name,partiFull:parti.full}));
+}
+
+// IMAGE
+async function generateImage(prompt){const body={model:MODEL_IMAGE,prompt:sanitize(prompt),n:1,size:'1K',ratio:'16:9'};const res=await apiFetch(API_BASE+'/images/generations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},'Image',4);const d=await res.json();const it=d.data&&d.data[0];if(!it)throw new Error('Pas d\'image');if(it.url)return it.url;if(it.b64_json)return'data:image/png;base64,'+it.b64_json;throw new Error('Format inconnu')}
+
+// VIDEO
+function decodeComposite(c){if(!c||typeof c!=='string'||!c.startsWith('video_'))return null;let b64=c.slice(6);while(b64.length%4)b64+='=';try{const d=atob(b64);const m=d.match(/video_id:([^;]+)/);if(m&&m[1])return m[1].trim()}catch(e){}return null}
+async function createVideoTask(prompt,imageUrl,duration){const body={model:MODEL_VIDEO,prompt:sanitize(prompt),num_frames:duration,frame_rate:FRAME_RATE};if(imageUrl)body.image=imageUrl;const res=await apiFetch(API_BASE+'/videos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},'VideoTask',4);const d=await res.json();const cid=d.video_id||d.id||d.task_id;if(!cid)throw new Error('Pas de video_id');const iid=decodeComposite(cid);debugLog('info','VIDÉO','composite='+String(cid).slice(0,40)+' inner='+(iid||'—'));return{compositeId:cid,innerId:iid,raw:d}}
+function buildCandidates(v){const ids=[];if(typeof v==='string'){ids.push({label:'composite',value:v});const i=decodeComposite(v);if(i&&i!==v)ids.push({label:'inner',value:i})}else if(v&&typeof v==='object'){if(v.compositeId)ids.push({label:'composite',value:v.compositeId});if(v.innerId)ids.push({label:'inner',value:v.innerId});const r=v.raw||{};for(const f of['id','task_id','request_id']){if(r[f]&&!ids.some(x=>x.value===r[f]))ids.push({label:'raw.'+f,value:r[f]})}}const seen=new Set();return ids.filter(x=>{if(seen.has(x.value))return false;seen.add(x.value);return true})}
+const POLL_BUILDERS=[
+  {name:'agnesapi',build:(id)=>POLL_BASE+'?video_id='+encodeURIComponent(id)+'&model_name='+encodeURIComponent(MODEL_VIDEO)},
+  {name:'v1-rest',build:(id)=>API_BASE+'/videos/'+encodeURIComponent(id)},
+  {name:'v1-status',build:(id)=>API_BASE+'/videos/'+encodeURIComponent(id)+'/status'}
+];
+async function pollVideo(vidObj,onProgress){
+  const cands=buildCandidates(vidObj);
+  if(!cands.length)throw new Error('Aucun ID');
+  const mw=Math.min(VIDEO_FIRST_POLL_DELAY_SEC,Math.max(40,Math.floor(90*0.7)));
+  let rem=mw;
+  while(rem>0){if(state.stopRequested)throw new Error('Arrêt demandé');onProgress('Préparation — '+rem+'s');await sleep(1000);rem--}
+  let working={builder:state.workingPollUrlBuilder||null,id:null};
+  for(let attempt=0;attempt<VIDEO_MAX_POLL_ATTEMPTS;attempt++){
+    if(state.stopRequested)throw new Error('Arrêt demandé');
+    if(attempt>0){const idx=Math.min(attempt-1,VIDEO_POLL_INTERVALS.length-1);let r=VIDEO_POLL_INTERVALS[idx];while(r>0){if(state.stopRequested)throw new Error('Arrêt demandé');onProgress('Création — '+r+'s');await sleep(1000);r--}}
+    const approaches=[];
+    if(working.builder&&working.id)approaches.push({builder:working.builder,id:working.id});
+    for(const b of POLL_BUILDERS)for(const c of cands)if(!approaches.some(a=>a.builder===b&&a.id===c.value))approaches.push({builder:b,id:c.value,idLabel:c.label});
+    let got=false,lastErr=null;
+    for(const ap of approaches){
+      if(state.stopRequested)throw new Error('Arrêt demandé');
+      const url=ap.builder.build(ap.id);
+      try{
+        const res=await apiFetch(url,{method:'GET'},'Polling',2);
+        const d=await res.json();
+        if(!working.builder){working.builder=ap.builder;working.id=ap.id;state.workingPollUrlBuilder=ap.builder;debugLog('success','POLLING','Endpoint : '+ap.builder.name)}
+        got=true;
+        const st=d.status||'unknown',pr=d.progress||0;
+        onProgress('Création — '+pr+'%');
+        if(st==='completed'||st==='succeeded'||st==='done'){const vu=(d.metadata&&d.metadata.url)||d.url||(d.output&&d.output.url);if(!vu)throw new Error('Terminé mais pas d\'URL');return vu}
+        if(st==='failed'||st==='error'||st==='cancelled')throw new Error('Échec ('+st+')');
+        break;
+      }catch(e){if(e.message==='Arrêt demandé')throw e;lastErr=e;if(e.status===404)continue;if(e.status===401||e.status===403)continue;break}
+    }
+    if(!got&&lastErr)debugLog('warn','POLLING','Aucune réponse 200 : '+lastErr.message);
+  }
+  throw new Error('Délai maximal dépassé');
+}
+
+// PROMPTS
+function pickPalette(){return PALETTES[Math.floor(Math.random()*PALETTES.length)]}
+function getParti(id){return PARTIS.find(p=>p.id===id)}
+function buildScriptPrompt(newsList,palette){
+  const paletteStr=palette.colors.join(', ');
+  const newsBlock=newsList.map((n,i)=>(i+1)+'. ['+n.partiName+'] « '+n.title+' »').join('\n');
+  return [
+    'Tu es scénariste et réalisateur d\'un JOURNAL TÉLÉVISÉ CINÉMATOGRAPHIQUE MULTI-PARTIS, STYLE WES ANDERSON strict.',
+    'Structure : PLATEAU OUVERTURE → REPORTAGES (un par sujet) → PLATEAU CONCLUSION.',
+    '',
+    'SUJETS À TRAITER :',newsBlock,'',
+    'ANGLE ÉDITORIAL par parti :',
+    '- LFI : justice sociale, antiracisme, écologie radicale',
+    '- RN : souveraineté nationale, contrôle migratoire',
+    '- Renaissance : réformes progressistes, europe, innovation',
+    '- PS : social-démocratie, europe sociale',
+    '- EÉLV : écologie politique, transition énergétique',
+    '',
+    'STYLE WES ANDERSON : symétrie parfaite, personnages centrés, caméra perpendiculaire, 35mm grain, palette pastel coordonnée.',
+    'MONTAGE : chaque scène = 4 à 6 plans avec CUTS FRANCS (large symétrique → moyen centré → gros plan → champ-contrechamp → insert).',
+    'PERSONNAGES : CHATONS KUNG-FU MIGNONS (tête de chaton kawaii sur corps humain) avec CASQUE MOTO RÉTRO et KIMONO SHAOLIN. Expressions deadpan.',
+    '',
+    'DIALOGUES : chaque scène DOIT avoir "dialogue.line_fr" en français, 5 à 12 mots.',
+    '- Scène 1 : "Bonsoir, voici notre journal multi-partis."',
+    '- Dernière : "Merci de nous avoir suivis, bonne soirée."',
+    '- Reportages : le reporter dit la news avec l\'angle du parti.',
+    '',
+    'PALETTE IMPOSÉE : '+palette.label+' → '+paletteStr,
+    '',
+    'RÉPONDS UNIQUEMENT EN JSON STRICT (une ligne par chaîne) :',
+    '{',
+    '  "title": "titre court",',
+    '  "logline": "résumé",',
+    '  "presenter": { "name": "Prénom Nom", "cat_face": "siamois aux yeux bleus", "helmet": "casque chromé", "outfit": "kimono rose", "physical_description": "cute kawaii humanoid kitten with siamese face, retro chrome helmet, pastel pink shaolin kimono, wes anderson deadpan" },',
+    '  "recurring_elements": { "motifs": ["chrome microphone"], "decor_style": "symmetric retro 1960s pastel TV studio" },',
+    '  "scenes": [',
+    '    { "scene_number": 1, "type": "plateau", "parti": null, "character": { "name": "...", "cat_face": "...", "helmet": "...", "outfit": "...", "physical_description": "..." }, "decor": "english", "action": "english", "shots": [ { "shot_number": 1, "camera": { "type": "wide", "movement": "locked-off", "framing": "centered wide" }, "description": "wide symmetric", "duration_seconds": 2 }, { "shot_number": 2, "camera": { "type": "medium", "movement": "slow dolly-in", "framing": "centered medium" }, "description": "medium", "duration_seconds": 2 }, { "shot_number": 3, "camera": { "type": "close-up", "movement": "locked-off", "framing": "centered close-up" }, "description": "close", "duration_seconds": 2 }, { "shot_number": 4, "camera": { "type": "champ-contrechamp", "movement": "locked-off", "framing": "centered medium" }, "description": "reverse", "duration_seconds": 2 } ], "dialogue": { "speaker": "Nom", "line_fr": "Bonsoir, voici notre journal multi-partis." }, "text_overlay_fr": "JT MULTI-PARTIS", "duration_seconds": 8 }',
+    '  ]',
+    '}',
+    '(puis un reportage par sujet avec "parti" défini, puis dernière scène plateau pour clôturer)',
+    'IMPORTANT : "shots" OBLIGATOIRE dans chaque scène avec 4 à 6 plans.'
+  ].join('\n');
+}
+function buildVideoPrompt(scene,script,palette){
+  const p=script.presenter||{},sc=scene.character||{};
+  const charName=sc.name||p.name||'Personnage';
+  const charDesc=sc.physical_description||p.physical_description||'cute kawaii humanoid kitten, retro helmet, shaolin kimono';
+  const isPlateau=scene.type==='plateau'||scene.scene_number===1;
+  const motifs=(script.recurring_elements&&script.recurring_elements.motifs)?script.recurring_elements.motifs.join(', '):'';
+  const decorStyle=(script.recurring_elements&&script.recurring_elements.decor_style)?script.recurring_elements.decor_style:'symmetric retro 1960s pastel TV studio';
+  const parti=scene.parti?getParti(scene.parti):null;
+  const partiAngle=parti?('EDITORIAL ANGLE — '+parti.full+' : '+parti.angle):'';
+  const newsTitle=scene._news?scene._news.title:'';
+  const line=(scene.dialogue&&scene.dialogue.line_fr)?scene.dialogue.line_fr:(scene.text_overlay_fr||'');
+  const shots=Array.isArray(scene.shots)?scene.shots:[];
+  let montage='';
+  if(shots.length)montage='MONTAGE — '+shots.length+' SHOTS WITH HARD CUTS:\n'+shots.map((sh,i)=>{const c=sh.camera||{};return '  SHOT '+(i+1)+' — '+(c.type||'?')+' / '+(c.movement||'?')+' : '+(sh.description||'')}).join('\n');
+  else montage='MONTAGE — 5 SYMMETRIC SHOTS WITH HARD CUTS.';
+  const identity=isPlateau?'PRESENTER (same as scene 1)':'FEATURED REPORTER (unique):';
+  return [
+    'A WES ANDERSON CINEMATIC NEWS BROADCAST — SHOT ON 35MM FILM.',
+    '► COMPOSITION : perfect bilateral symmetry, dead-center framing, planimetric staging, eye-level, locked-off or slow dolly-in.',
+    '► EDITING : HARD CUTS, shot-reverse-shot for dialogues, insert shots.',
+    '► CAMERA MOVES : static, dolly-in, whip pan, tracking, snap zoom. Never handheld.',
+    '► FILM STOCK : 35mm, visible grain, warm halation, magenta/gold cast, no digital sharpness.',
+    '► COLOR PALETTE : '+palette.label+' → '+palette.colors.join(', ')+'.',
+    '► CHARACTERS : cute kawaii humanoid kittens (kitten head on human body), retro motorcycle helmet, shaolin kimono. Deadpan.',
+    '',
+    identity,
+    '  '+charName+' — '+charDesc,'',
+    partiAngle,motifs?'MOTIFS : '+motifs:'','SET : '+decorStyle,'',
+    'SCENE '+(scene.scene_number||'?')+' — '+String(scene.type||'scene').toUpperCase(),
+    newsTitle?'NEWS : "'+newsTitle+'"':'',
+    'DECOR : '+(scene.decor||''),
+    'ACTION : '+(scene.action||''),
+    line?'SPOKEN LINE (French, mouth moving) : "'+line+'"':'','',
+    montage,'',
+    '► BACKGROUND : deadpan kitten extras with retro helmets.','',
+    'CONSTRAINTS : 35mm grain, hard cuts, symmetry, pastel palette, no text, no watermarks, no shake.'
+  ].filter(Boolean).join('\n');
+}
+function buildImagePrompt(scene,script,palette){
+  const p=script.presenter||{},sc=scene.character||{};
+  const charName=sc.name||p.name||'Personnage';
+  const charDesc=sc.physical_description||p.physical_description||'cute kawaii humanoid kitten';
+  return 'Wes Anderson cinematic keyframe, 35mm film grain, pastel palette '+palette.colors.join(', ')+'. Symmetry, dead-center framing. CHARACTER : '+charName+' — '+charDesc+'. SCENE : '+(scene.decor||'')+' — '+(scene.action||'')+'. No text, no watermarks, 16:9 film grain.';
+}
+
+// LLM
+async function chatCall(systemPrompt,userPrompt,label,maxTokens,temperature){
+  const body={model:MODEL_TEXT,messages:[{role:'system',content:sanitize(systemPrompt)||'Assistant'},{role:'user',content:sanitize(userPrompt)}],temperature:typeof temperature==='number'?temperature:0.7,max_tokens:maxTokens||8000,reasoning_effort:'none',chat_template_kwargs:{enable_thinking:false}};
+  const res=await apiFetch(API_BASE+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)},label,4);
+  const d=await res.json();
+  const msg=d.choices&&d.choices[0]&&d.choices[0].message;
+  let content=msg&&msg.content;
+  if(!content&&msg&&msg.reasoning_content)content=msg.reasoning_content;
+  debugLog('response',label,'len='+((content&&content.length)||0));
+  return content;
+}
+
+// FALLBACK SCENARIO
+function shorten(title,max){max=max||90;if(!title)return'';let t=String(title).trim();if(t.length<=max)return t;const c=t.slice(0,max);const sp=c.lastIndexOf(' ');return(sp>20?c.slice(0,sp).trim():c.trim()).replace(/[,;:.\-–—]+$/,'')+'.'}
+function fallbackScript(newsList,palette){
+  const presenter={name:'Élise Moreau',cat_face:'siamoise aux yeux bleus',helmet:'casque chromé à visière',outfit:'kimono rose poudré',physical_description:'cute kawaii humanoid kitten with siamese face, retro chrome helmet, pastel pink shaolin kimono'};
+  const mkShots=(lbl)=>[
+    {shot_number:1,camera:{type:'wide symmetric shot',movement:'locked-off',framing:'centered wide'},description:'wide tableau '+lbl,duration_seconds:2},
+    {shot_number:2,camera:{type:'medium shot',movement:'slow dolly-in',framing:'centered medium'},description:'medium '+lbl,duration_seconds:2},
+    {shot_number:3,camera:{type:'close-up',movement:'locked-off',framing:'centered close-up'},description:'close '+lbl,duration_seconds:2},
+    {shot_number:4,camera:{type:'champ-contrechamp',movement:'locked-off',framing:'centered medium'},description:'reverse '+lbl,duration_seconds:2}
+  ];
+  const scenes=[{scene_number:1,type:'plateau',parti:null,character:{...presenter},decor:'symmetric retro 1960s pastel TV studio',action:'presenter speaks deadpan',shots:mkShots('studio'),dialogue:{speaker:presenter.name,line_fr:'Bonsoir, voici notre journal multi-partis.'},text_overlay_fr:'JT MULTI-PARTIS',duration_seconds:8}];
+  newsList.forEach((news,i)=>{
+    const p=getParti(news.parti);
+    scenes.push({scene_number
